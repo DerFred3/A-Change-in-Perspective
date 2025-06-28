@@ -16,7 +16,10 @@ public class RendererManager : MonoBehaviour {
     }
 
     public void RegisterRenderer(Renderer renderer) {
-        if (renderers.Contains(renderer)) return;
+        if (renderers.Contains(renderer)) {
+            Debug.Log("Not adding renderer of " + renderer.gameObject.name);
+            return;
+        }
         renderers.Add(renderer);
     }
 

@@ -14,7 +14,7 @@ TagManager:
   - Ground
   - Wall
   - Interactable
-  - 
+  - Player
   - 
   - StencilMask1
   - StencilMask2

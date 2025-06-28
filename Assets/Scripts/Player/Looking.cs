@@ -1,13 +1,15 @@
 using Unity.Hierarchy;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Looking : MonoBehaviour {
     [SerializeField] private Transform _camTransform;
-    [SerializeField] private GameObject _lookingAt;
+    [SerializeField] public GameObject LookingAt;
     [SerializeField] private string[] _lookableLayerNames;
-    [SerializeField] private Renderer _renderer;
 
     private LayerMask _layerMask;
+
+    [HideInInspector] public UnityEvent LookAtChanged = new UnityEvent();
 
     private void Awake() {
         _layerMask = LayerMask.GetMask(_lookableLayerNames);
@@ -20,8 +22,9 @@ public class Looking : MonoBehaviour {
             return;
         }
 
-        if (_lookingAt == null || hit.collider.gameObject != _lookingAt) {
-            _lookingAt = hit.collider.gameObject;
+        if (LookingAt == null || hit.collider.gameObject != LookingAt) {
+            LookingAt = hit.collider.gameObject;
+            LookAtChanged.Invoke();
         }
     }
 }

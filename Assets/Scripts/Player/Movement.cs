@@ -1,3 +1,4 @@
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -22,12 +23,15 @@ public class Movement : MonoBehaviour {
     [SerializeField] private InputActionReference _actionMove;
     [SerializeField] private InputActionReference _actionLook;
 
+    [Header("Debug")]
+    [SerializeField] public bool EnableGravity = true;
+
     private Rigidbody _rb;
     private int _groundLayer;
 
     private void Awake() {
         _rb = GetComponent<Rigidbody>();
-        _groundLayer = LayerMask.GetMask(new string[] { "Ground" });
+        _groundLayer = LayerMask.GetMask(new string[] { "Ground", "Interactable" });
     }
 
     private void OnEnable() {
@@ -47,6 +51,7 @@ public class Movement : MonoBehaviour {
     private void FixedUpdate() {
         HandleGroundOffset();
         HandleMovement();
+        ApplyGravity();
     }
 
     private void HandleGroundOffset() {
@@ -57,9 +62,16 @@ public class Movement : MonoBehaviour {
         }
 
         float offset = (hit.point.y + (hit.normal.normalized.y * _playerHeight)) - transform.position.y;
+        if (offset < 0f) return;
         float dampingForce = Vector3.Project(_rb.linearVelocity, ray.direction.normalized).y * _playerStandDamping;
         float appliedForce = offset * _playerStandStrength - dampingForce;
         _rb.AddForce(Vector3.up * appliedForce, ForceMode.Impulse);
+    }
+    
+    private void ApplyGravity() {
+        if (!EnableGravity) return;
+
+        _rb.AddForce(-transform.up * Physics.gravity.magnitude, ForceMode.Force);
     }
 
     private void HandleMovement() {
@@ -70,11 +82,12 @@ public class Movement : MonoBehaviour {
         Vector3 movementForce = Vector3.zero;
         Vector3 localVelocity = transform.InverseTransformDirection(_rb.linearVelocity);
 
-        sideways *= Mathf.Clamp01(1f - Mathf.Abs(localVelocity.x) / _maxMovementSpeed);
-        forward *= Mathf.Clamp01(1f - Mathf.Abs(localVelocity.z) / _maxMovementSpeed);
+        sideways *= 1f - Mathf.Abs(localVelocity.x) / _maxMovementSpeed;
+        forward *= 1f - Mathf.Abs(localVelocity.z) / _maxMovementSpeed;
 
         movementForce += transform.right * sideways;
         movementForce += transform.forward * forward;
+        movementForce = movementForce.normalized;
         movementForce *= _movementSpeed;
 
         if (movement.x == 0f) {
@@ -98,8 +111,21 @@ public class Movement : MonoBehaviour {
         transform.localEulerAngles = newRotation;
 
         Vector3 newCamRotation = _camTransform.eulerAngles;
-        newCamRotation.x += -pitch * _lookingPitchSpeed;
-        Mathf.Clamp(newCamRotation.x, -_lookingDownMax, _lookingUpMax);
-        _camTransform.eulerAngles = newCamRotation;
+        ConvertToUnsignedAngle(ConvertToSignedAngle(newCamRotation.x) + -pitch * _lookingPitchSpeed);
+        newCamRotation.x = newCamRotation.x + -pitch * _lookingPitchSpeed;
+        float signedAngle = ConvertToSignedAngle(newCamRotation.x);
+        if (signedAngle > _lookingDownMax && signedAngle < _lookingUpMax) {
+            _camTransform.eulerAngles = newCamRotation;
+        }
+    }
+
+    private float ConvertToSignedAngle(float angle) {
+        float result = ((angle + 180f) % 360) - 180f;
+        return result;
+    }
+
+    private float ConvertToUnsignedAngle(float angle) {
+        float result = (angle + 360) % 360;
+        return result;
     }
 }
