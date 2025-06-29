@@ -30,6 +30,22 @@ public class Interaction : MonoBehaviour {
         RaycastHit hit;
         if (!Physics.Raycast(ray, out hit, float.MaxValue, LayerMask.GetMask("Interactable"))) return;
 
+        Grabbable grabbable = hit.collider.GetComponentInParent<Grabbable>();
+        if (grabbable != null) {
+            HandleGrabbable(hit);
+        }
+        Interactable interactable = hit.collider.GetComponentInParent<Interactable>();
+        if (interactable != null) {
+            HandleInteractable(interactable);
+        }
+    }
+
+    private void HandleInteractable(Interactable interactable) {
+        interactable.Interaction();
+    }
+
+    private void HandleGrabbable(RaycastHit hit) {
+        Transform camTransform = ReferenceManager.Instance.CameraTransform;
         _heldObject = hit.collider.gameObject;
         float distanceToObject = (_heldObject.transform.position - camTransform.position).magnitude;
         float distanceToAnchor = (_interactionAnchor.position - camTransform.position).magnitude;

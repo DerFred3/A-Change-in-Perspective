@@ -1,4 +1,3 @@
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -17,17 +16,21 @@ public class Movement : MonoBehaviour {
     [SerializeField] private float _lookingYawSpeed;
     [SerializeField] private float _lookingUpMax;
     [SerializeField] private float _lookingDownMax;
+    [SerializeField] private float _stepcooldown;
 
     [Header("References")]
     [SerializeField] private Transform _camTransform;
     [SerializeField] private InputActionReference _actionMove;
     [SerializeField] private InputActionReference _actionLook;
+    [SerializeField] private AudioSource _audio;
 
     [Header("Debug")]
     [SerializeField] public bool EnableGravity = true;
 
     private Rigidbody _rb;
     private int _groundLayer;
+
+    private float _lastStepSoundAt = 0f;
 
     private void Awake() {
         _rb = GetComponent<Rigidbody>();
@@ -46,12 +49,25 @@ public class Movement : MonoBehaviour {
 
     private void Update() {
         HandleLooking();
+        HandleStepSound();
     }
 
     private void FixedUpdate() {
         HandleGroundOffset();
         HandleMovement();
         ApplyGravity();
+    }
+
+    private void HandleStepSound() {
+        Vector2 movement = _actionMove.action.ReadValue<Vector2>();
+        if (movement.x == 0f && movement.y == 0f) return;
+
+        if (Time.time > _lastStepSoundAt + _stepcooldown) {
+            float pitch = Random.Range(0.9f, 1.1f);
+            _audio.pitch = pitch;
+            _audio.Play();
+            _lastStepSoundAt = Time.time;
+        }
     }
 
     private void HandleGroundOffset() {

@@ -15,6 +15,8 @@ public class TransferPlayerBetweenRooms : MonoBehaviour {
     }
 
     private void OnTriggerEnter(Collider other) {
+        if (_destination == null) return;
+
         Transform playerTransform = ReferenceManager.Instance.PlayerTransform;
         Vector3 triggerToPlayer = playerTransform.position - transform.position;
 

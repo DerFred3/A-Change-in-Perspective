@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1693f69469a852c41a2a0b9b0f4fa65a, type: 3}
+  m_Name: IntroWhileFade
+  m_EditorClassIdentifier: 
+  Entries:
+  - What a stressful night..
+  - Sometimes I wonder, if I should be switching jobs..
+  - To dream of my work meetings for the upcoming week seems to be a bad sign..
+  - And why was it some fight against upcoming meetings?
+  - The meetings seemed so alive..
+  - Almost as if they were trying to invade my calendar..
+  - What a truly awful dream.
+  - And what an awful concept of a dream at that!
+  - Well, no time to worry about all of that now. Time to get up!

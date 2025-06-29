@@ -8,6 +8,8 @@ using UnityEngine.Events;
 public class DialogueHandle : MonoBehaviour {
     public static DialogueHandle Instance;
 
+    public bool IsDisplaying = false;
+
     [Header("Settings")]
     [SerializeField] private float _delayBetweenCharacters;
     [SerializeField] private float _delayBeforeClear;
@@ -15,6 +17,8 @@ public class DialogueHandle : MonoBehaviour {
 
     [Header("References")]
     [SerializeField] private TextMeshProUGUI _textUI;
+    [SerializeField] private GameObject _sfxPrefab;
+    [SerializeField] private Transform _sfxParent;
 
     private Queue<string> dialogueQueue = new Queue<string>();
     private Coroutine _workerCoroutine;
@@ -43,6 +47,7 @@ public class DialogueHandle : MonoBehaviour {
     private IEnumerator WorkQueue() {
         while (true) {
             if (dialogueQueue.Count == 0) {
+                IsDisplaying = false;
                 _canvas.enabled = false;
                 _textUI.text = "";
                 yield return new WaitForSeconds(DIALOGUE_FETCH_IDLE_TIME);
@@ -50,6 +55,7 @@ public class DialogueHandle : MonoBehaviour {
             }
 
             _canvas.enabled = true;
+            IsDisplaying = true;
             string currentItem = dialogueQueue.Dequeue();
             string[] currentItemWords = currentItem.Split(' ');
             _textUI.text = "";
@@ -67,6 +73,10 @@ public class DialogueHandle : MonoBehaviour {
                 }
                 for (int j = 0; j < currentItemWords[i].Length; j++) {
                     _textUI.text += currentItemWords[i][j];
+                    if (j % 3 == 0) {
+                        float pitch = Random.Range(0.8f, 1.1f);
+                        GameObject newSfx = Instantiate(_sfxPrefab, _sfxParent);
+                    }
                     yield return new WaitForSeconds(_delayBetweenCharacters);
                 }
                 _textUI.text += " ";
